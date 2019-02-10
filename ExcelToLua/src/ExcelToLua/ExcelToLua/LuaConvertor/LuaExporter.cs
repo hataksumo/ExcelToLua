@@ -70,12 +70,14 @@ namespace ExcelToLua
                         indexMap.init(true, ExportSheetBin.ROW_MAX_ELEMENT);
                         v_dst.addData(key, indexMap);
                         _translate(data, indexMap);
+                        indexMap.Note = data.Note;
                         break;
                     case EExcelMapDataType.rowData:
                         LuaMap rowData = new LuaMap();
                         rowData.init(false, ExportSheetBin.ROW_MAX_ELEMENT);
                         v_dst.addData(key, rowData);
                         _translate(data, rowData);
+                        rowData.Note = data.Note;
                         break;
                     case EExcelMapDataType.cellTable:
                         LuaTable cellTable;
@@ -91,10 +93,12 @@ namespace ExcelToLua
                         }
                         v_dst.addData(key, cellTable);
                         _translate(data, cellTable);
+                        cellTable.Note = data.Note;
                         break;
                     case EExcelMapDataType.cellData:
                         LuaValue leafVal = data.LeafVal.GetLuaValue();
                         v_dst.addData(key, leafVal);
+                        leafVal.Note = data.Note;
                         break;
                 }
             }

@@ -55,6 +55,14 @@ namespace ExcelToLua
             _OutputKey(sb, v_key, v_level, v_style);
             outputValue(sb, v_level, v_style);
         }
+        public void printNote(StringBuilder sb)
+        {
+            if (!string.IsNullOrEmpty(m_note))
+            {
+                sb.Append("--");
+                sb.Append(m_note);
+            }
+        }
         public abstract void outputValue(StringBuilder sb, int v_level,uint v_style = 0);
     }
 
@@ -300,10 +308,6 @@ namespace ExcelToLua
         private void _OutputElementSrcForStretch(StringBuilder sb, int v_level, uint v_style)
         {
             sb.Append('{');
-            if (m_note != null)
-            {
-                sb.AppendFormat("--{0}", m_note);
-            }
             sb.Append("\r\n");
             int dataCnt = _GetDataCount();
             for (int i = 0; i < dataCnt; i++)
@@ -312,10 +316,7 @@ namespace ExcelToLua
                 data.outputSrc(sb, v_level + 1, _GetKey(i), ISNEWLINE);
                 if (i < dataCnt - 1)
                     sb.Append(",");
-                if (data.Note != null)
-                {
-                    sb.AppendFormat("--{0}", data.Note);
-                }
+                data.printNote(sb);
                 sb.Append("\r\n");
             }
             output_t(sb, v_level);
