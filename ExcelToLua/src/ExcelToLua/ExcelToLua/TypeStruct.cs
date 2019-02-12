@@ -104,13 +104,14 @@ namespace ExcelToLua
 
         public void opt_note(StringBuilder v_sb,string v_title)
         {
+            v_sb.AppendFormat("--{0}:\r\n", v_title);
             for (int i = 0; i < sheet_bins.Count; i++)
             {
                 if (!string.IsNullOrWhiteSpace(sheet_bins[i].indexData.note))
                 {
-                    v_sb.AppendFormat("--{0}:\r\n", v_title);
+                    if(i>0)
+                        v_sb.AppendLine();
                     v_sb.Append(sheet_bins[i].indexData.note);
-                    return;
                 }
             }
         }

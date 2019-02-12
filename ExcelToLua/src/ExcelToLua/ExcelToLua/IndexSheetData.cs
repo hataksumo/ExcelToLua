@@ -45,7 +45,7 @@ namespace ExcelToLua
             else
                 isOpt = optCols.ToString().Equals("TRUE");
             note = v_header.getData(v_data, v_row, "表注释") as string;
-            Object dataPersistence = v_header.getData(v_data, v_row, "是否导出");
+            Object dataPersistence = v_header.getData(v_data, v_row, "常驻内存");
             if (dataPersistence == null) dataPersistence = false;
             if (dataPersistence is bool)
                 isDataPersistence = (bool)dataPersistence;
