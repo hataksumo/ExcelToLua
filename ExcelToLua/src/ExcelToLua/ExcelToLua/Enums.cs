@@ -37,6 +37,10 @@ namespace ExcelToLua
         cellTable,//对应excel表一行中，不是叶子节点的数据
         cellData//对应一个单元格的数据
     }
-
+    public enum IntFormat
+    {
+        normal,//普通
+        hex//16进制
+    }
 
 }

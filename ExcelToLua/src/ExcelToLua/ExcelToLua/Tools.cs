@@ -29,5 +29,34 @@ namespace ExcelToLua
             string rtn = new string(strArr);
             return rtn;
         }
+
+        public static int getHex(string v_hexStr)
+        {
+            int sum = 0;
+            int off = v_hexStr[0] == '0' && v_hexStr[1] == 'x' ? 2 : 0;
+            Debug.Assert(v_hexStr.Length - off <= 4, "16进制整数最多只能4位");
+            char[] chararr = v_hexStr.ToCharArray(off, v_hexStr.Length - off);
+            for (int i = 0; i < chararr.Length; i++)
+            {
+                sum *= 16;
+                if (char.IsDigit(chararr[i]))
+                {
+                    sum += chararr[i] - '0';
+                }
+                else if (char.IsUpper(chararr[i]))
+                {
+                    sum += chararr[i] - 'A';
+                }
+                else if (char.IsLower(chararr[i]))
+                {
+                    sum += chararr[i] - 'a';
+                }
+                else
+                {
+                    Debug.Assert(false, string.Format("{0}的第{1}个字符格式错误", v_hexStr, i + off));
+                }
+            }
+            return sum;
+        }
     }
 }

@@ -107,10 +107,11 @@ namespace ExcelToLua
 
     }
 
+
+
     class LuaInteger : LuaValue
     {
         protected int m_data;
-
         public LuaInteger() { }
         public LuaInteger(int v_int)
         {
@@ -125,6 +126,16 @@ namespace ExcelToLua
             sb.Append(m_data);
         }
     }
+
+    class LuaHexInteger : LuaInteger
+    {
+        public override void outputValue(StringBuilder sb, int v_level, uint v_style = 0)
+        {
+            sb.Append("0x"+m_data.ToString("X4"));
+        }
+    }
+
+
 
     class LuaProb10k : LuaInteger
     {

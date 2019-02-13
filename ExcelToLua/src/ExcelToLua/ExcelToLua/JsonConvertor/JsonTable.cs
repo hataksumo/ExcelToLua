@@ -111,6 +111,14 @@ namespace ExcelToLua
         }
     }
 
+    class JsonHexInteger : JsonInteger
+    {
+        public override void outputValue(StringBuilder sb, int v_level, uint v_style = 0)
+        {
+            sb.Append("0x"+m_data.ToString("X4"));
+        }
+    }
+
     class JsonFloat : JsonValue
     {
         protected float m_data;

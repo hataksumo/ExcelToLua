@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -173,6 +174,9 @@ namespace ExcelToLua
                 case "dataFromLuaFile":
                     rtn = new DataFromLuaFileValue();
                     break;
+                case "intX":
+                    rtn = new HexInt();
+                    break;
                 default:
                     rtn = new IDVal(v_type);
                     break;
@@ -282,6 +286,27 @@ namespace ExcelToLua
             Key rtn = new Key();
             rtn.keytype = KeyType.Integer;
             rtn.ikey = _data;
+            return rtn;
+        }
+    }
+
+    class HexInt : IntVal
+    {
+        protected override bool _OnInit(string v_strCellVal)
+        {
+            _data = Tools.getHex(v_strCellVal);
+            return true;
+        }
+        protected override LuaValue _OnGetLuaValue()
+        {
+            LuaHexInteger rtn = new LuaHexInteger();
+            rtn.init(_isEmpty ? -1 : _data);
+            return rtn;
+        }
+        protected override JsonValue _OnGetJsonValue()
+        {
+            JsonHexInteger rtn = new JsonHexInteger();
+            rtn.init(_isEmpty ? -1 : _data);
             return rtn;
         }
     }
