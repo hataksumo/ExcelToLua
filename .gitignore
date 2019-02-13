@@ -31,3 +31,4 @@ sysinfo.txt
 *.unitypackage
 /ExcelToLua/src/ExcelToLua/ExcelToLua/obj
 bin
+.vs
