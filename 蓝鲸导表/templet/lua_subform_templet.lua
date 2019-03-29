@@ -1,3 +1,3 @@
 local {name} = {content}
-SetLooseReadonly({name}_1)
-return {name}_1
+SetLooseReadonly({name})
+return {name}
