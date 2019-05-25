@@ -440,7 +440,7 @@ namespace ExcelToLua
 
         public override bool addData(Key v_key, LuaValue v_val, string v_note)
         {
-            Debug.Assert(v_key.keytype == KeyType.Integer && v_key.ikey <= m_data.Count+1, "只能加入整型键的数据，并且下标不可越界");
+            Debug.Assert(v_key.keytype == KeyType.Integer && v_key.ikey <= m_data.Count+1, string.Format("只能加入整型键的数据，并且下标不可越界。但现在加入的却是{0}", v_key));
             addData(v_val);
             return true;
         }

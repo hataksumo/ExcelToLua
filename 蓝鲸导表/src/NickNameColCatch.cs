@@ -49,7 +49,7 @@ namespace ExcelToLua
             }
             if (!m_data[v_setName].addData(v_keyName, v_id))
             {
-                Debug.Exception("添加重复键{0}", v_keyName);
+                Debug.Exception("添加重复键{0}：{1}", v_keyName, v_id);
             }
         }
         public bool getID(string v_setName, string v_keyName,out int vout_id)
@@ -187,10 +187,11 @@ namespace ExcelToLua
         {
             int cnt = m_data.Count;
             bool isDuplicated = m_keyIndex.ContainsKey(v_key);
+            if (isDuplicated) return false;
             m_data.Add(new KeyValuePair<string, int>(v_key, v_val));
             m_keyIndex.Add(v_key, cnt);
             m_ids.Add(v_val);
-            return !isDuplicated;
+            return true;
         }
         public bool getID(string v_id, out int vo_id)
         {

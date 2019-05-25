@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Aspose.Cells;
@@ -45,10 +46,19 @@ namespace ExcelToLua
 
         private void handle()
         {
+            beginLoad();
+            Thread td = new Thread(new ThreadStart(_handle));
+            td.Start();
+        }
+
+        private void _handle()
+        {
             for (int i = 0; i < selected.Length; i++)
             {
                 apposeReadExcel(selected[i]);
+                Thread.Sleep(50);
             }
+            loadFinished();
         }
 
 
@@ -62,12 +72,14 @@ namespace ExcelToLua
         {
             Excel.Workbook book = new Excel.Workbook(v_filePath);
             Excel.Worksheet index_sheet = book.Worksheets["INDEX"];
+            lblLoading.Text = string.Format("加载表{0}", Path.GetFileNameWithoutExtension(v_filePath));
             if (index_sheet == null)
             {
                 __old_readExcel(v_filePath);
                 return;
             }
             //读取索引表
+            lblLoadDesc.Text = "读取Index表......";
             List<IndexSheetData> indexes = new List<IndexSheetData>();
             SheetHeader index_header = new SheetHeader();
             index_header.readHeader(index_sheet);
@@ -100,18 +112,20 @@ namespace ExcelToLua
                 table_memo[i] = new Dictionary<string, ExcelToMapData>();
                 sheetBin_memo[i] = new Dictionary<string, ExportSheetBin>();
             }
+            lblLoadDesc.Text = "Index表读取完成";
+            Thread.Sleep(50);
             //根据索引表读取各sheet
             foreach (IndexSheetData curIndex in indexes)
             {
                 if (!curIndex.isOpt)
                     continue;
+                lblLoadDesc.Text = string.Format("读取sheet{0}......", curIndex.sheetName);
                 Excel.Worksheet curSheet = book.Worksheets[curIndex.sheetName];
                 if (curSheet == null)
                 {
                     Debug.Error("{0}没有找到sheet[{1}]", Path.GetFileName(v_filePath),curIndex.sheetName);
                     return;
                 }
-
                 ExportSheetBin sheetBin = new ExportSheetBin();
                 try
                 {
@@ -123,6 +137,9 @@ namespace ExcelToLua
                     Debug.Error("{0}_[{1}]导出基础数据时出现错误，错误信息为:\r\n{2}", Path.GetFileNameWithoutExtension(v_filePath), curIndex.sheetName, ex.ToString());
                     return;
                 }
+                lblLoadDesc.Text = string.Format("sheet{0}读取完毕", curIndex.sheetName);
+                Thread.Sleep(50);
+                lblLoadDesc.Text = string.Format("sheet{0}开始装载数据......", curIndex.sheetName);
                 //根据服务端的文件名，创建获取luamap
                 string[] file_names = {curIndex.optCliFileName,curIndex.optSrvFileName};
                 for (int i = 0; i < table_memo.Length; i++)//客户端服务端各生成一遍
@@ -153,10 +170,13 @@ namespace ExcelToLua
                     {
                         Debug.Error("在装载【{0}】数据到中间结构时发生错误，错误信息是{1}", curIndex.sheetName, ex.ToString());
                     }
-                }                  
+                }
+                lblLoadDesc.Text = string.Format("sheet{0}装载数据完毕", curIndex.sheetName);
+                Thread.Sleep(50);
             }
 
             //这里应当写为，根据后缀名导出不同的语言
+            lblLoadDesc.Text = string.Format("开始导出数据......");
             for (int i = 0; i < table_memo.Length; i++)
             {
                 foreach (var cur_pair in table_memo[i])
@@ -204,6 +224,8 @@ namespace ExcelToLua
                         
                 }
             }
+            lblLoadDesc.Text = string.Format("导出数据完毕");
+            Thread.Sleep(50);
             Debug.Info("{0}:导表完成~~~", Path.GetFileName(v_filePath));
         }
 
@@ -211,17 +233,53 @@ namespace ExcelToLua
         public string servPath = "";
         public string excelPath = "";
 
+
+        private void beginLoad()
+        {
+            btnCalELO.Visible = false;
+            btnSele.Visible = false;
+            btnComoileLua.Visible = false;
+            btnOptDesign.Visible = false;
+            lblLoading.Visible = true;
+            lblLoadDesc.Visible = true;
+        }
+
+        private void loadFinished()
+        {
+            btnCalELO.Visible = true;
+            btnSele.Visible = true;
+            btnComoileLua.Visible = true;
+            btnOptDesign.Visible = true;
+            lblLoading.Visible = false;
+            lblLoadDesc.Visible = false;
+        }
+
+
+
         private void frmMain_Load(object sender, EventArgs e)
         {
+            beginLoad();
             try
             {
                 Config.load();
             }
             catch (Exception ex) { Debug.Error("xml解析时失败"+ex.ToString()); }
+
+            Thread loadingTrread = new Thread(new ThreadStart(_load));
+            loadingTrread.Start();
+
+        }
+
+        protected void _load()
+        {
             //加载luastate
-            LuaState.Init(Config.luaCfgPath+"main.lua");
+            lblLoadDesc.Text = "加载luastate......";
+            LuaState.Init(Config.luaCfgPath + "main.lua");
             LuaState.SetPath(Config.luaCfgPath);
             LuaState.DoMain();
+            lblLoadDesc.Text = "luastate加载完成";
+            Thread.Sleep(50);
+            lblLoadDesc.Text = "读取INDEX表......";
             cliPath = Config.cliPath;
             servPath = Config.servPath;
             excelPath = Config.excelPath;
@@ -235,7 +293,7 @@ namespace ExcelToLua
             //读取需要索引的数据列表
             for (int row = 1; row < 200; row++)
             {
-                if (data[row, 0].Value == null|| string.IsNullOrWhiteSpace(data[row, 0].Value.ToString()))
+                if (data[row, 0].Value == null || string.IsNullOrWhiteSpace(data[row, 0].Value.ToString()))
                 {
                     break;
                 }
@@ -243,11 +301,16 @@ namespace ExcelToLua
                 rowData.readData(data, row, header);
                 nameCatchIndexDatas.Add(rowData);
             }
+            lblLoadDesc.Text = "INDEX表读取完成";
+            Thread.Sleep(50);
+            lblLoadDesc.Text = "根据INDEX表加载各名称表......";
             NickNameColCatchManager nickNameColCatchManager = NickNameColCatchManager.getInstence();
+            Thread.Sleep(50);
             //打开各表，生成各名称ID转换
-            foreach(NameCatchIndexData curIndex in nameCatchIndexDatas.ToArray())
+            foreach (NameCatchIndexData curIndex in nameCatchIndexDatas.ToArray())
             {
-                string excelPath = Config.excelPath + curIndex.excelFileName+".xlsx";
+                string excelPath = Config.excelPath + curIndex.excelFileName + ".xlsx";
+                lblLoadDesc.Text = string.Format("加载表{0},处理名称{1}......", curIndex.excelFileName, curIndex.fieldName);
                 Excel.Worksheet sheet = null;
                 if (!File.Exists(excelPath))
                 {
@@ -261,7 +324,8 @@ namespace ExcelToLua
                     if (sheet == null)
                         Debug.Exception("没有找到名为[" + curIndex.sheetName + "]的sheet");
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Debug.Error(ex.ToString());
                     Application.Exit();
                     return;
@@ -271,13 +335,13 @@ namespace ExcelToLua
                 int idColIndex = theHeader[curIndex.columName];
                 if (idColIndex == -1)
                 {
-                    Debug.Error("{1}  列{0}不存在", curIndex.columName, curIndex.excelFileName + "["+ curIndex.sheetName+"]");
+                    Debug.Error("{1}  列{0}不存在", curIndex.columName, curIndex.excelFileName + "[" + curIndex.sheetName + "]");
                     return;
                 }
                 int noteIndex = theHeader[curIndex.noteColName];
                 if (noteIndex == -1)
                 {
-                    Debug.Error("{1}  列{0}不存在", curIndex.noteColName, curIndex.excelFileName + "[" + curIndex.sheetName+"]");
+                    Debug.Error("{1}  列{0}不存在", curIndex.noteColName, curIndex.excelFileName + "[" + curIndex.sheetName + "]");
                     return;
                 }
                 Excel.Cells theDatas = sheet.Cells;
@@ -296,13 +360,16 @@ namespace ExcelToLua
                     }
                     catch (Exception ex)
                     {
-                        Debug.Error("{0}表[{1}],第{2}行出错啦，错误信息为:\r\n  " + ex.ToString(), curIndex.excelFileName,curIndex.sheetName,row +1);
+                        Debug.Error("{0}表[{1}],第{2}行出错啦，错误信息为:\r\n  " + ex.ToString(), curIndex.excelFileName, curIndex.sheetName, row + 1);
                         return;
                     }
                 }
+                lblLoadDesc.Text = string.Format("表{0}加载完成", curIndex.excelFileName);
+                Thread.Sleep(50);
             }
-
+            loadFinished();
         }
+
 
 
         private void btnCalELO_Click(object sender, EventArgs e)

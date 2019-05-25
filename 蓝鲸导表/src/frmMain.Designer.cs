@@ -32,6 +32,8 @@
             this.btnCalELO = new System.Windows.Forms.Button();
             this.btnOptDesign = new System.Windows.Forms.Button();
             this.btnComoileLua = new System.Windows.Forms.Button();
+            this.lblLoading = new System.Windows.Forms.Label();
+            this.lblLoadDesc = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnSele
@@ -75,11 +77,35 @@
             this.btnComoileLua.UseVisualStyleBackColor = true;
             this.btnComoileLua.Click += new System.EventHandler(this.btnComoileLua_Click);
             // 
+            // lblLoading
+            // 
+            this.lblLoading.AutoSize = true;
+            this.lblLoading.Font = new System.Drawing.Font("微软雅黑", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblLoading.Location = new System.Drawing.Point(37, 5);
+            this.lblLoading.Name = "lblLoading";
+            this.lblLoading.Size = new System.Drawing.Size(262, 38);
+            this.lblLoading.TabIndex = 11;
+            this.lblLoading.Text = "正在加载配置表......";
+            this.lblLoading.Visible = false;
+            // 
+            // lblLoadDesc
+            // 
+            this.lblLoadDesc.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblLoadDesc.Location = new System.Drawing.Point(12, 60);
+            this.lblLoadDesc.Name = "lblLoadDesc";
+            this.lblLoadDesc.Size = new System.Drawing.Size(308, 39);
+            this.lblLoadDesc.TabIndex = 12;
+            this.lblLoadDesc.Text = "加载开始...";
+            this.lblLoadDesc.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblLoadDesc.Visible = false;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(332, 107);
+            this.Controls.Add(this.lblLoadDesc);
+            this.Controls.Add(this.lblLoading);
             this.Controls.Add(this.btnComoileLua);
             this.Controls.Add(this.btnOptDesign);
             this.Controls.Add(this.btnCalELO);
@@ -88,6 +114,7 @@
             this.Text = "数值策划工具";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -97,6 +124,8 @@
         private System.Windows.Forms.Button btnCalELO;
         private System.Windows.Forms.Button btnOptDesign;
         private System.Windows.Forms.Button btnComoileLua;
+        private System.Windows.Forms.Label lblLoading;
+        private System.Windows.Forms.Label lblLoadDesc;
     }
 }
 

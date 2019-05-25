@@ -318,10 +318,12 @@ namespace ExcelToLua
             var first = v_cur.getKeyValueSet()[0];
             if (!first.val.IsLeaf)
             {
-                return getLastMul(first.val, out v_isOpt, v_layer + 1);
+                 return getLastMul(first.val, out v_isOpt, v_layer + 1);
             }
             else
             {
+                v_isOpt = m_header_dct[first.val.LeafDataIdx].is_need_opt(2);
+                if (!v_isOpt) return null;
                 StringBuilder sb = new StringBuilder();
                 if (m_header_dct[first.val.LeafDataIdx].DataStructure == ECellDataStructure.array)
                 {
@@ -342,7 +344,7 @@ namespace ExcelToLua
                     sb.Append("," + v_layer);
                     
                 }
-                v_isOpt = m_header_dct[first.val.LeafDataIdx].is_need_opt(2);
+                
                 return sb.ToString();
             }
         }

@@ -348,7 +348,7 @@ namespace ExcelToLua
         protected string _data;
         protected override bool _OnInit(string v_strCellVal, string[] v_constraint)
         {
-            _data = v_strCellVal.Replace("\\","\\\\").Replace("\r\n", "\\r\\n").Replace("\"", "\\\"");
+            _data = v_strCellVal.Replace("\\","\\\\").Replace("\r", "\\r").Replace("\"", "\\\"").Replace("\n","\\n");
             return true;
         }
         public override bool Equals(CellValue v_other)
@@ -400,7 +400,13 @@ namespace ExcelToLua
         protected override bool _OnInit(string v_strCellVal, string[] v_constraint)
         {
             _data = v_strCellVal;
-            if (Config.isTestAssetPath)
+            bool bIsTest = Config.isTestAssetPath;
+            if (_data[0] == '@')
+            {
+                _data = _data.Substring(1);
+                bIsTest = false;
+            }
+            if (bIsTest)
             {
                 string subPath = "";
                 string prefix = "";
