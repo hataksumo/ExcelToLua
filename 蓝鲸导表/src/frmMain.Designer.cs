@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.btnSele = new System.Windows.Forms.Button();
-            this.btnCalELO = new System.Windows.Forms.Button();
+            this.btnOptWords = new System.Windows.Forms.Button();
             this.btnOptDesign = new System.Windows.Forms.Button();
             this.btnComoileLua = new System.Windows.Forms.Button();
             this.lblLoading = new System.Windows.Forms.Label();
@@ -47,15 +47,15 @@
             this.btnSele.Click += new System.EventHandler(this.btnSele_Click);
             this.btnSele.KeyUp += new System.Windows.Forms.KeyEventHandler(this.btnSele_KeyUp);
             // 
-            // btnCalELO
+            // btnOptWords
             // 
-            this.btnCalELO.Location = new System.Drawing.Point(214, 1);
-            this.btnCalELO.Name = "btnCalELO";
-            this.btnCalELO.Size = new System.Drawing.Size(96, 42);
-            this.btnCalELO.TabIndex = 7;
-            this.btnCalELO.Text = "计算ELO";
-            this.btnCalELO.UseVisualStyleBackColor = true;
-            this.btnCalELO.Click += new System.EventHandler(this.btnCalELO_Click);
+            this.btnOptWords.Location = new System.Drawing.Point(214, 1);
+            this.btnOptWords.Name = "btnOptWords";
+            this.btnOptWords.Size = new System.Drawing.Size(96, 42);
+            this.btnOptWords.TabIndex = 7;
+            this.btnOptWords.Text = "导出文本表";
+            this.btnOptWords.UseVisualStyleBackColor = true;
+            this.btnOptWords.Click += new System.EventHandler(this.btnCalELO_Click);
             // 
             // btnOptDesign
             // 
@@ -81,7 +81,7 @@
             // 
             this.lblLoading.AutoSize = true;
             this.lblLoading.Font = new System.Drawing.Font("微软雅黑", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.lblLoading.Location = new System.Drawing.Point(37, 5);
+            this.lblLoading.Location = new System.Drawing.Point(37, 4);
             this.lblLoading.Name = "lblLoading";
             this.lblLoading.Size = new System.Drawing.Size(262, 38);
             this.lblLoading.TabIndex = 11;
@@ -91,7 +91,7 @@
             // lblLoadDesc
             // 
             this.lblLoadDesc.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.lblLoadDesc.Location = new System.Drawing.Point(12, 60);
+            this.lblLoadDesc.Location = new System.Drawing.Point(12, 59);
             this.lblLoadDesc.Name = "lblLoadDesc";
             this.lblLoadDesc.Size = new System.Drawing.Size(308, 39);
             this.lblLoadDesc.TabIndex = 12;
@@ -108,7 +108,7 @@
             this.Controls.Add(this.lblLoading);
             this.Controls.Add(this.btnComoileLua);
             this.Controls.Add(this.btnOptDesign);
-            this.Controls.Add(this.btnCalELO);
+            this.Controls.Add(this.btnOptWords);
             this.Controls.Add(this.btnSele);
             this.Name = "frmMain";
             this.Text = "数值策划工具";
@@ -121,7 +121,7 @@
         #endregion
 
         private System.Windows.Forms.Button btnSele;
-        private System.Windows.Forms.Button btnCalELO;
+        private System.Windows.Forms.Button btnOptWords;
         private System.Windows.Forms.Button btnOptDesign;
         private System.Windows.Forms.Button btnComoileLua;
         private System.Windows.Forms.Label lblLoading;

@@ -10,7 +10,7 @@ namespace ExcelToLua
     static class LuaExporter
     {
         public static OptData getExportContent(ExcelToMapData v_data, int v_optCode, 
-            string rootPath, string fileName)
+            string[] rootPath, string fileName)
         {
             OptData rtn = new OptData();
             StringBuilder sb = new StringBuilder();
@@ -31,6 +31,8 @@ namespace ExcelToLua
                     sb.Append("\r\n");
                 }
                 sb.Append("]]\r\n");
+
+                sb.Append("local _T = LangUtil.Language\r\n");
 
                 if (v_data.IsDataPersistence)
                 {
@@ -54,8 +56,15 @@ namespace ExcelToLua
             }
 
             rtn.content = sb.ToString();
-            string opt_path = rootPath + fileName;
-            File.WriteAllText(opt_path, rtn.content);
+            
+            for (int i = 0; i < rootPath.Length; i++)
+            {
+                string opt_path = rootPath[i] + fileName;
+                File.WriteAllText(opt_path, rtn.content);
+            }
+
+
+            
 
             return rtn;
             //sb.Append(string.Format("\r\nreturn {0}", curIndex.className));

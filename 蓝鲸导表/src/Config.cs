@@ -36,8 +36,8 @@ namespace ExcelToLua
         public static ExcelPathConfig attr_designer_Path = new ExcelPathConfig();
         public static ExcelPathConfig elo_data_path = new ExcelPathConfig();
         public static string packageName = "dTable";
-        public static string cliPath = "";
-        public static string servPath = "";
+        public static string[] cliPath = null;
+        public static string[] servPath = null;
         public static string export_path = "";
         public static string excelPath = "";
         public static string indexPath = "";
@@ -69,8 +69,10 @@ namespace ExcelToLua
             isRealeace = bool.Parse(appNode.Attributes["isRelease"].Value);
             //设置策划表路径
             XmlNode xmlPathNode = xmlroot.SelectSingleNode("path");
-            cliPath = xmlPathNode.Attributes["cli"].Value;
-            servPath = xmlPathNode.Attributes["serv"].Value;
+            string strCliPath = xmlPathNode.Attributes["cli"].Value;
+            cliPath = strCliPath.Split('|');
+            string strSrvPath = xmlPathNode.Attributes["serv"].Value;
+            servPath = strSrvPath.Split('|');
             export_path = xmlPathNode.Attributes["export"].Value;
             excelPath = xmlPathNode.Attributes["excelPath"].Value;
             indexPath = xmlPathNode.Attributes["indexPath"].Value;
@@ -82,14 +84,21 @@ namespace ExcelToLua
                 Debug.Info("没有找到路径： {0},将不会对资源进行检测", assetPath);
                 isTestAssetPath = false;
             }
-            if (!Directory.Exists(cliPath))
+            for (int i = 0; i < cliPath.Length; i++)
             {
-                Directory.CreateDirectory(cliPath);
+                if (!Directory.Exists(cliPath[i]))
+                {
+                    Directory.CreateDirectory(cliPath[i]);
+                }
             }
-            if (!Directory.Exists(servPath))
+            for (int i = 0; i < servPath.Length; i++)
             {
-                Directory.CreateDirectory(servPath);
+                if (!Directory.Exists(servPath[i]))
+                {
+                    Directory.CreateDirectory(servPath[i]);
+                }
             }
+
             if (!Directory.Exists(export_path))
             {
                 Directory.CreateDirectory(export_path);

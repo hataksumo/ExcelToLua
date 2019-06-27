@@ -245,7 +245,7 @@ namespace ExcelToLua
         public override void outputSrc(StringBuilder sb, int v_level, string v_key, uint v_style = 0)
         {
             _OutputKey(sb, v_key, v_level, v_style);
-            sb.Append("(_T\"" + m_data + "\")");
+            sb.Append("_T(\"" + m_data + "\")");
         }
     }
 
