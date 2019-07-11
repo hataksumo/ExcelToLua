@@ -433,6 +433,14 @@ namespace ExcelToLua
 
     class CStringVal : StringVal
     {
+        protected override bool _OnInit(string v_strCellVal, string[] v_constraint)
+        {
+            if (!base._OnInit(v_strCellVal, v_constraint))
+                return false;
+            CstringMemo memo = CstringMemo.GetInstence();
+            memo.AddCstring(_data);
+            return true;
+        }
         protected override LuaValue _OnGetLuaValue()
         {
             LuaCString rtn = new LuaCString();

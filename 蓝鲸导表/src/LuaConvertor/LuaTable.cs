@@ -42,11 +42,10 @@ namespace ExcelToLua
             if (!_IfPrintKey(v_key, v_style))
                 return;
 
-            if (v_key[0] >= '0' && v_key[0] <= '9' || v_key[0] == '-' || v_key[0] == '.')
+            if (!Tools.canBeKey(v_key))
+            {
                 v_key = string.Format("[\"{0}\"]", v_key);
-            //if ((v_style & TIGHT) != 0)
-            //    sb.Append(v_key + "=");
-            //else
+            }
             sb.Append(v_key + " = ");
         }
 

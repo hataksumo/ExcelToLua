@@ -91,7 +91,7 @@ namespace ExcelToLua
         }
 
 
-        public void apposeReadExcel(string v_filePath)
+        public void apposeReadExcel(string v_filePath, bool v_isOpt = true)
         {
             Excel.Workbook book = new Excel.Workbook(v_filePath);
             Excel.Worksheet index_sheet = book.Worksheets["INDEX"];
@@ -174,7 +174,8 @@ namespace ExcelToLua
                         bool isDataPersistence = curIndex.isDataPersistence && (!string.IsNullOrEmpty(curIndex.optCliFileName))&&curIndex.optCliFileName.EndsWith(".lua");
                         ExcelToMapData new_data = new ExcelToMapData(new_map,
                             isDataPersistence,
-                            Path.GetFileNameWithoutExtension(file_names[i]));
+                            Path.GetFileNameWithoutExtension(file_names[i]),
+                            Path.GetFileName(v_filePath));
                         table_memo[i].Add(file_names[i], new_data);
                     }
                     if (!sheetBin_memo[i].ContainsKey(file_names[i]))
@@ -197,6 +198,8 @@ namespace ExcelToLua
                 updateDesc(string.Format("sheet {0}装载数据完毕", curIndex.sheetName));
                 Thread.Sleep(50);
             }
+            if (!v_isOpt)
+                return;
 
             //这里应当写为，根据后缀名导出不同的语言
             updateDesc(string.Format("开始导出数据......"));
@@ -251,10 +254,6 @@ namespace ExcelToLua
             Debug.Info("{0}:导表完成~~~", Path.GetFileName(v_filePath));
         }
 
-        //public string[] cliPath = null;
-        //public string[] servPath = null;
-        //public string[] excelPath = null;
-
 
         private void beginLoad()
         {
@@ -278,10 +277,6 @@ namespace ExcelToLua
             }));    
         }
 
-        private void Invoke(Func<object> p)
-        {
-            throw new NotImplementedException();
-        }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
@@ -308,9 +303,6 @@ namespace ExcelToLua
             updateDesc("luastate加载完成");
             Thread.Sleep(50);
             updateDesc("读取INDEX表......");
-            //cliPath = Config.cliPath;
-            //servPath = Config.servPath;
-            //excelPath = Config.excelPath;
             Excel.Workbook indexBook = new Excel.Workbook(Config.indexPath);
             Excel.Worksheet indexSheet = indexBook.Worksheets["index"];
             Excel.Cells data = indexSheet.Cells;
@@ -400,7 +392,7 @@ namespace ExcelToLua
 
 
 
-        private void btnCalELO_Click(object sender, EventArgs e)
+        private void btnOptWords_Click(object sender, EventArgs e)
         {
             //Lua.Lua lua = new Lua.Lua();
             //lua.DoFile("Lua\\main.lua");
@@ -416,20 +408,50 @@ namespace ExcelToLua
             //Console.WriteLine(sb.ToString());
             //Debug.Info(sb.ToString());
             //new frmElo().ShowDialog();
-            string excelPath = Config.excelPath;
-            string[] files =  Directory.GetFiles(excelPath,"*.xlsx");
-            foreach (string v_filePath in files)
-            {
-                Excel.Workbook doc = new Excel.Workbook(v_filePath);
-                if (doc.Worksheets["INDEX"] == null)
-                {
-                    continue;
-                }
-                apposeReadExcel(v_filePath);
-            }
+            beginLoad();
+            Thread loadingTrread = new Thread(new ThreadStart(_btnOptWords_Click));
+            loadingTrread.Start();      
         }
 
-        
+        private void _btnOptWords_Click()
+        {
+            string excelPath = Config.excelPath;
+            string[] files = Config.outputFiles;
+            if(files == null)
+                files = Directory.GetFiles(excelPath, "*.xlsx");
+            CstringMemo memo = CstringMemo.GetInstence();
+            foreach (string v_filePath in files)
+            {
+                try
+                {
+                    if (!File.Exists(v_filePath))
+                    {
+                        Debug.Error("没有找到路径{0}，程序退出，请检查xml配置", v_filePath);
+                        loadFinished();
+                        return;
+                    }
+
+                    Excel.Workbook doc = new Excel.Workbook(v_filePath);
+                    if (doc.Worksheets["INDEX"] == null)
+                    {
+                        continue;
+                    }
+                    updateTitle(string.Format("加载表 {0}", Path.GetFileNameWithoutExtension(v_filePath)));
+                    updateDesc("正在加载文件......");
+                    apposeReadExcel(v_filePath, false);
+                }
+                catch (Exception ex)
+                {
+                    Debug.Error("发生错误： " + ex.ToString());
+                }
+            }
+            loadFinished();
+            memo.OutputMemoExcel(Config.excelPath + "\\Words\\Words.翻译.xlsx");
+            loadFinished();
+            Debug.Koid("导出完成");
+        }
+
+
 
         private void btnOptDesign_Click(object sender, EventArgs e)
         {

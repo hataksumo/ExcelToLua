@@ -97,8 +97,6 @@ namespace ExcelToLua
             notes = new List<string>();
         }
 
-
-
         public bool init(EXCEL.Worksheet v_workSheet, IndexSheetData v_indexData, int v_rowBegin = 3)
         {
             indexData = v_indexData;
@@ -236,10 +234,5 @@ namespace ExcelToLua
 
 
     }
-
-    
-
-    
-
 
 }

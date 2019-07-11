@@ -55,7 +55,7 @@
             this.btnOptWords.TabIndex = 7;
             this.btnOptWords.Text = "导出文本表";
             this.btnOptWords.UseVisualStyleBackColor = true;
-            this.btnOptWords.Click += new System.EventHandler(this.btnCalELO_Click);
+            this.btnOptWords.Click += new System.EventHandler(this.btnOptWords_Click);
             // 
             // btnOptDesign
             // 
@@ -91,7 +91,7 @@
             // lblLoadDesc
             // 
             this.lblLoadDesc.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.lblLoadDesc.Location = new System.Drawing.Point(12, 59);
+            this.lblLoadDesc.Location = new System.Drawing.Point(12, 60);
             this.lblLoadDesc.Name = "lblLoadDesc";
             this.lblLoadDesc.Size = new System.Drawing.Size(308, 39);
             this.lblLoadDesc.TabIndex = 12;

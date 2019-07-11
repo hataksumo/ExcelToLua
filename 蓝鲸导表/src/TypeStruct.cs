@@ -97,13 +97,15 @@ namespace ExcelToLua
 
     struct ExcelToMapData
     {
+        public string excelName;
         public ExcelMapData _data;
         public List<ExportSheetBin> sheet_bins;
         public string className;
         private readonly bool _isDataPersistence;
-        public ExcelToMapData(ExcelMapData v_luaMap,bool v_isDataPersistence,string v_className)
+        public ExcelToMapData(ExcelMapData v_luaMap,bool v_isDataPersistence,string v_className,string v_excelName)
         {
             _data = v_luaMap;
+            excelName = v_excelName;
             _isDataPersistence = v_isDataPersistence;
             className = v_className;
             sheet_bins = new List<ExportSheetBin>();

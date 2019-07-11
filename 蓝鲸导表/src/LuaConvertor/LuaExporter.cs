@@ -18,6 +18,7 @@ namespace ExcelToLua
             {
                 LuaMap root = GetLuaTable(v_data._data, v_data.IsSingleKey);
                 sb.Append("--[[\r\n");
+                sb.AppendFormat("output from excel {0}\r\n", v_data.excelName);
                 v_data.opt_note(sb, "note");
                 sb.Append("\r\n");
                 sb.Append("colums:\r\n");
@@ -62,9 +63,6 @@ namespace ExcelToLua
                 string opt_path = rootPath[i] + fileName;
                 File.WriteAllText(opt_path, rtn.content);
             }
-
-
-            
 
             return rtn;
             //sb.Append(string.Format("\r\nreturn {0}", curIndex.className));

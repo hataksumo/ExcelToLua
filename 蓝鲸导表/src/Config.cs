@@ -49,6 +49,7 @@ namespace ExcelToLua
         public static List<Output_designer_config> designer_opt_configs;
         public static string simulator_src = ".\\战斗模拟_源数据.xlsx";
         public static string simulator_tar = ".\\战斗模拟_输出.xlsx";
+        public static string[] outputFiles = null;
 
 
 
@@ -111,6 +112,26 @@ namespace ExcelToLua
             {
                 attr_designer_Path.path = attrDesignerNode.Attributes["path"].Value;
                 attr_designer_Path.sheets = attrDesignerNode.Attributes["sheets"].Value.Split(';');
+            }
+
+            //要导出的表
+            XmlNode outputFilesNode = xmlroot.SelectSingleNode("outputFiles");
+            if (outputFilesNode != null)
+            {
+                string root = excelPath;
+                if (outputFilesNode.Attributes["root"] != null)
+                {
+                    root = outputFilesNode.Attributes["root"].Value;
+                }
+                XmlNodeList filesNode = outputFilesNode.ChildNodes;
+                List<string> path = new List<string>();
+                for (int i = 0; i < filesNode.Count; i++)
+                {
+                    XmlNode theFileNode = filesNode.Item(i);
+                    string thePath = root + theFileNode.InnerText + ".xlsx";
+                    path.Add(thePath);
+                }
+                outputFiles = path.ToArray();
             }
 
             //导出数据配置

@@ -58,5 +58,18 @@ namespace ExcelToLua
             }
             return sum;
         }
+
+        public static bool canBeKey(string v_key)
+        {
+            if (!(v_key[0] >= 'a' && v_key[0] <= 'z' || v_key[0] >= 'A' && v_key[0] <= 'z' || v_key[0] == '_'))
+                return false;
+            int len = v_key.Length;
+            for (int i = 0; i < len; i++)
+            {
+                if (!(v_key[i] >= 'a' && v_key[i] <= 'z' || v_key[i] >= 'A' && v_key[i] <= 'z' || v_key[i] == '_' || v_key[i] >= '0' && v_key[i] <= '9'))
+                    return false;
+            }
+            return true;
+        }
     }
 }
