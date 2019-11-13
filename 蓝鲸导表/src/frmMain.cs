@@ -46,7 +46,7 @@ namespace ExcelToLua
 
         private void handle()
         {
-            beginLoad();
+            beginWork();
             Thread td = new Thread(new ThreadStart(_handle));
             td.Start();
         }
@@ -59,7 +59,7 @@ namespace ExcelToLua
                 updateDesc("正在加载文件......");
                 apposeReadExcel(selected[i]);
             }
-            loadFinished();
+            workFinished();
         }
 
 
@@ -128,7 +128,7 @@ namespace ExcelToLua
 
             Dictionary<string, ExcelToMapData>[] table_memo = new Dictionary<string, ExcelToMapData>[2];
             Dictionary<string, ExportSheetBin>[] sheetBin_memo = new Dictionary<string, ExportSheetBin>[2];
-            string[][] root_pathes = { Config.cliPath, Config.servPath};
+            string[][] root_pathes = { Config.CliPathes, Config.SrvPathes};
             int[] optCode = { 1, 2};
             for (int i = 0; i < table_memo.Length; i++)
             {
@@ -255,23 +255,28 @@ namespace ExcelToLua
         }
 
 
-        private void beginLoad()
+        private void beginWork()
         {
             btnOptWords.Visible = false;
             btnSele.Visible = false;
             btnComoileLua.Visible = false;
+            BtnCopyCfgFile.Visible = false;
             btnOptDesign.Visible = false;
+            btnReload.Visible = false;
             lblLoading.Visible = true;
             lblLoadDesc.Visible = true;
+            
         }
 
-        private void loadFinished()
+        private void workFinished()
         {
             this.Invoke(new Action(()=>{
                 btnOptWords.Visible = true;
                 btnSele.Visible = true;
                 btnComoileLua.Visible = true;
                 btnOptDesign.Visible = true;
+                BtnCopyCfgFile.Visible = true;
+                btnReload.Visible = true;
                 lblLoading.Visible = false;
                 lblLoadDesc.Visible = false;
             }));    
@@ -280,7 +285,7 @@ namespace ExcelToLua
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            beginLoad();
+            beginWork();
             //CheckForIllegalCrossThreadCalls = false;
             try
             {
@@ -297,9 +302,17 @@ namespace ExcelToLua
         {
             //加载luastate
             updateDesc("加载luastate......");
-            LuaState.Init(Config.luaCfgPath + "main.lua");
-            LuaState.SetPath(Config.luaCfgPath);
-            LuaState.DoMain();
+            try
+            {
+                LuaState.Init(Config.luaCfgPath + "main.lua");
+                LuaState.SetPath(Config.luaCfgPath);
+                LuaState.DoMain();
+            }
+            catch (Exception ex)
+            {
+                Debug.Error("加载lua报错，信息是" + ex.ToString());
+                return;
+            }
             updateDesc("luastate加载完成");
             Thread.Sleep(50);
             updateDesc("读取INDEX表......");
@@ -325,6 +338,7 @@ namespace ExcelToLua
             Thread.Sleep(50);
             updateDesc("根据INDEX表加载各名称表......");
             NickNameColCatchManager nickNameColCatchManager = NickNameColCatchManager.getInstence();
+            nickNameColCatchManager.init();
             Thread.Sleep(50);
             //打开各表，生成各名称ID转换
             foreach (NameCatchIndexData curIndex in nameCatchIndexDatas.ToArray())
@@ -387,28 +401,14 @@ namespace ExcelToLua
                 updateDesc(string.Format("表{0}加载完成", curIndex.excelFileName));
                 Thread.Sleep(50);
             }
-            loadFinished();
+            workFinished();
         }
 
 
 
         private void btnOptWords_Click(object sender, EventArgs e)
         {
-            //Lua.Lua lua = new Lua.Lua();
-            //lua.DoFile("Lua\\main.lua");
-            //var fun = lua["say_hello"] as Lua.LuaFunction;
-            //if (fun != null)
-            //{
-            //    fun.Call();
-            //}
-            //TableFrmFile tff = new TableFrmFile();
-            //tff.init("t2");
-            //StringBuilder sb = new StringBuilder();
-            //tff.getLuaValue().outputSrc(sb, 0, "t2");
-            //Console.WriteLine(sb.ToString());
-            //Debug.Info(sb.ToString());
-            //new frmElo().ShowDialog();
-            beginLoad();
+            beginWork();
             Thread loadingTrread = new Thread(new ThreadStart(_btnOptWords_Click));
             loadingTrread.Start();      
         }
@@ -420,6 +420,8 @@ namespace ExcelToLua
             if(files == null)
                 files = Directory.GetFiles(excelPath, "*.xlsx");
             CstringMemo memo = CstringMemo.GetInstence();
+            memo.initByFile(Config.excelPath+Config.srcWordsFilePath);
+
             foreach (string v_filePath in files)
             {
                 try
@@ -427,7 +429,7 @@ namespace ExcelToLua
                     if (!File.Exists(v_filePath))
                     {
                         Debug.Error("没有找到路径{0}，程序退出，请检查xml配置", v_filePath);
-                        loadFinished();
+                        workFinished();
                         return;
                     }
 
@@ -445,9 +447,9 @@ namespace ExcelToLua
                     Debug.Error("发生错误： " + ex.ToString());
                 }
             }
-            loadFinished();
-            memo.OutputMemoExcel(Config.excelPath + "\\Words\\Words.翻译.xlsx");
-            loadFinished();
+            workFinished();
+            memo.OutputMemoExcel(Config.excelPath + "\\Words\\Words.翻译-导出.xlsx");
+            workFinished();
             Debug.Koid("导出完成");
         }
 
@@ -533,6 +535,47 @@ namespace ExcelToLua
                 }
                 catch (Exception ex) { Debug.Error(ex.ToString()); }
             }
+        }
+
+        private void _BtnCopyCfgFile()
+        {
+            string[] sourceFolderPathes = new string[] { Config.cliPath, Config.servPath };
+            string[][] destinationPathes = new string[][] { Config.copyCliPath, Config.copyServPath };
+            string[] pathName = { "客户端文件", "服务端文件" };
+            for (int i = 0; i < sourceFolderPathes.Length; i++)
+            {
+                string[] filePathes = Directory.GetFiles(sourceFolderPathes[i]);
+                updateTitle(string.Format("拷贝{0}", pathName[i]));
+                foreach (string dstPath in destinationPathes[i])
+                {
+                    //updateTitle(string.Format("拷贝文件夹{0}to{1}", Path.GetFileNameWithoutExtension(sourceFolderPathes[i]), Path.GetFileNameWithoutExtension(dstPath)));
+                    Thread.Sleep(50);
+                    foreach (string theFilePath in filePathes)
+                    {
+                        string theFileName = Path.GetFileName(theFilePath);
+                        updateDesc(string.Format("拷贝{0}", theFileName));
+                        File.Copy(theFilePath, dstPath + theFileName, true);
+                    }
+                }
+                Thread.Sleep(200);
+            }
+            updateDesc("");
+            updateTitle("拷贝完成");
+            Debug.Koid("拷贝完成");
+            workFinished();
+        }
+
+
+        private void BtnCopyCfgFile_Click(object sender, EventArgs e)
+        {
+            beginWork();
+            Thread loadingTrread = new Thread(new ThreadStart(_BtnCopyCfgFile));
+            loadingTrread.Start();
+        }
+
+        private void btnReload_Click(object sender, EventArgs e)
+        {
+            frmMain_Load(sender, e);
         }
     }
 

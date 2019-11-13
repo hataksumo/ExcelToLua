@@ -36,15 +36,18 @@ namespace ExcelToLua
         public static ExcelPathConfig attr_designer_Path = new ExcelPathConfig();
         public static ExcelPathConfig elo_data_path = new ExcelPathConfig();
         public static string packageName = "dTable";
-        public static string[] cliPath = null;
-        public static string[] servPath = null;
+        public static string cliPath = null;
+        public static string servPath = null;
         public static string export_path = "";
         public static string excelPath = "";
         public static string indexPath = "";
         public static string templetPath = "";
         public static string luaCfgPath = "";
+        public static string srcWordsFilePath = "Words.翻译.xlsx";
         public static bool isTestAssetPath = true;
         public static string assetPath = "";
+        public static string[] copyCliPath = null;
+        public static string[] copyServPath = null;
         public static bool isRealeace = false;
         public static List<Output_designer_config> designer_opt_configs;
         public static string simulator_src = ".\\战斗模拟_源数据.xlsx";
@@ -70,41 +73,65 @@ namespace ExcelToLua
             isRealeace = bool.Parse(appNode.Attributes["isRelease"].Value);
             //设置策划表路径
             XmlNode xmlPathNode = xmlroot.SelectSingleNode("path");
-            string strCliPath = xmlPathNode.Attributes["cli"].Value;
-            cliPath = strCliPath.Split('|');
-            string strSrvPath = xmlPathNode.Attributes["serv"].Value;
-            servPath = strSrvPath.Split('|');
             export_path = xmlPathNode.Attributes["export"].Value;
             excelPath = xmlPathNode.Attributes["excelPath"].Value;
             indexPath = xmlPathNode.Attributes["indexPath"].Value;
             templetPath = xmlPathNode.Attributes["templetPath"].Value;
             luaCfgPath = xmlPathNode.Attributes["lua_cfg"].Value;
             assetPath = xmlPathNode.Attributes["assetPath"] != null? xmlPathNode.Attributes["assetPath"].Value:"null";
+
+            //加载导出服务端路径和客户端路径
+            string strCliPath = xmlPathNode.Attributes["cli"].Value;
+            cliPath = strCliPath.Split('|')[0];
+            string strSrvPath = xmlPathNode.Attributes["serv"].Value;
+            servPath = strSrvPath.Split('|')[0];
+            //加载拷贝路径
+            XmlNode copyNode = xmlroot.SelectSingleNode("copyPath");
+            string strCopyCliPath = copyNode.Attributes["cli"].Value;
+            copyCliPath = strCopyCliPath.Split('|');
+            string strCopySrvPath = copyNode.Attributes["serv"].Value;
+            copyServPath = strCopySrvPath.Split('|');
+            //修正路径
+            cliPath = __rectify_folder_path(cliPath);
+            servPath = __rectify_folder_path(servPath);
+            for (int i = 0; i < copyCliPath.Length; i++)
+            {
+                copyCliPath[i] = __rectify_folder_path(copyCliPath[i]);
+            }
+            for (int i = 0; i < copyServPath.Length; i++)
+            {
+                copyServPath[i] = __rectify_folder_path(copyServPath[i]);
+            }
+
+
+            //检测所配置的路径是否有误
+            string[] pathes = new string[2 + copyCliPath.Length + copyServPath.Length];
+            pathes[0] = cliPath;
+            pathes[1] = servPath;
+            Array.Copy(copyCliPath, 0, pathes, 2, copyCliPath.Length);
+            Array.Copy(copyServPath, 0, pathes, 2+ copyCliPath.Length, copyServPath.Length);
+            for (int i = 0; i < pathes.Length; i++)
+            {
+                if (!Directory.Exists(pathes[i]))
+                {
+                    if (i < 2)
+                    {
+                        Directory.CreateDirectory(pathes[i]);
+                    }
+                    else
+                    {
+                        Debug.Exception("没有找到路径{0},请检查配置后重新启动软件", pathes[i]);
+                        return;
+                    }
+                }
+            }
+
+
             if (!Directory.Exists(assetPath))
             {
                 Debug.Info("没有找到路径： {0},将不会对资源进行检测", assetPath);
                 isTestAssetPath = false;
             }
-            for (int i = 0; i < cliPath.Length; i++)
-            {
-                if (!Directory.Exists(cliPath[i]))
-                {
-                    Directory.CreateDirectory(cliPath[i]);
-                }
-            }
-            for (int i = 0; i < servPath.Length; i++)
-            {
-                if (!Directory.Exists(servPath[i]))
-                {
-                    Directory.CreateDirectory(servPath[i]);
-                }
-            }
-
-            if (!Directory.Exists(export_path))
-            {
-                Directory.CreateDirectory(export_path);
-            }
-
 
             //设置设计表相关路径
             XmlNode attrDesignerNode = xmlroot.SelectSingleNode("attrDesigner");
@@ -122,6 +149,10 @@ namespace ExcelToLua
                 if (outputFilesNode.Attributes["root"] != null)
                 {
                     root = outputFilesNode.Attributes["root"].Value;
+                }
+                if (outputFilesNode.Attributes["srcFile"] != null)
+                {
+                    srcWordsFilePath = outputFilesNode.Attributes["srcFile"].Value;
                 }
                 XmlNodeList filesNode = outputFilesNode.ChildNodes;
                 List<string> path = new List<string>();
@@ -177,9 +208,30 @@ namespace ExcelToLua
         }
         private static string __rectify_folder_path(string v_path)
         {
-            if (v_path.Last<char>() != '\\' || v_path.Last<char>() != '/')
+            if (v_path.Last<char>() != '\\' && v_path.Last<char>() != '/')
                 return v_path + "\\";
             return v_path;
+        }
+
+        public static string[] CliPathes
+        {
+            get {
+                string[] rtn = new string[1+copyCliPath.Length];
+                rtn[0] = cliPath;
+                Array.Copy(copyCliPath, 0, rtn, 1, copyCliPath.Length);
+                return rtn;
+            }
+        }
+
+        public static string[] SrvPathes
+        {
+            get
+            {
+                string[] rtn = new string[1 + copyServPath.Length];
+                rtn[0] = servPath;
+                Array.Copy(copyServPath, 0, rtn, 1, copyServPath.Length);
+                return rtn;
+            }
         }
     }
 }

@@ -21,12 +21,20 @@ namespace ExcelToLua
         {
             _workSheet = v_sheet;
             Excel.Cells data = _workSheet.Cells;
-            for (int i = 0; i < 100; i++)
+            int i = 0;
+            try
             {
-                if (data[v_headerRow, i].Value == null)
-                    break;
-                _headerIndex.Add(data[v_headerRow, i].StringValue, _header.Count);
-                _header.Add(data[v_headerRow, i].StringValue);
+                for (i = 0; i < 100; i++)
+                {
+                    if (data[v_headerRow, i].Value == null)
+                        break;
+                    _headerIndex.Add(data[v_headerRow, i].StringValue, _header.Count);
+                    _header.Add(data[v_headerRow, i].StringValue);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Error("添加重复建{0},系统报错是:\r\n{1}", data[v_headerRow, i].StringValue,ex.ToString());
             }
         }
 

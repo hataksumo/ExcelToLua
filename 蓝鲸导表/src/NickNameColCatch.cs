@@ -28,6 +28,11 @@ namespace ExcelToLua
         public static NickNameColCatchManager getInstence() { return s_Instence; }
         public NickNameColCatchManager()
         {
+            init();
+        }
+
+        public void init()
+        {
             m_data = new Dictionary<string, NickNameColCatch>();
         }
 

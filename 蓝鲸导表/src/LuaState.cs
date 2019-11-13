@@ -27,7 +27,15 @@ namespace ExcelToLua
         public static void DoMain()
         {
             Lua.LuaFunction fun = lua_instence.GetFunction("main");
-            fun.Call();
+            try
+            {
+                fun.Call();
+            }
+            catch (Exception ex)
+            {
+                Debug.Exception("执行main报错，信息是" + ex.ToString());
+            }
+            
         }
 
         public static Lua.Lua Get_Instenct()

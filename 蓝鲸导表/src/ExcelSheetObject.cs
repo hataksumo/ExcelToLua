@@ -33,6 +33,21 @@ namespace ExcelToLua
             return -1;
         }
         public int Count { get { return m_header.Count; } }
+
+        public string[] Data
+        {
+            get {
+                return m_header.Keys.ToArray();
+            }
+        }
+
+        public int this[string v_header_name]
+        {
+            get {
+                return get_col(v_header_name);
+            }
+        }
+
     }
 
 
@@ -64,12 +79,24 @@ namespace ExcelToLua
             return row * 100 + col;
         }
     }
+
+    struct ExcelSingleKeyData
+    {
+        public string _pmKey;
+        public List<string> dataHeaders;
+        public Dictionary<string, List<object>> _datas;
+    }
+
+
+
     class ExcelSheetObject
     {
         protected Excel.Worksheet m_sheet;
         protected ExcelHeaderHelp m_header;
         protected string m_sheet_name;
-        Dictionary<CellPoint, List<object>> m_src_infos;
+        //Dictionary<CellPoint, List<object>> m_src_infos;
+        Dictionary<string, List<object>> _data;
+        string _pmKey;
         public ExcelSheetObject(Excel.Worksheet v_worksheet, string v_sheet_name)
         {
             m_sheet = v_worksheet;
@@ -247,8 +274,9 @@ namespace ExcelToLua
         Dictionary<string, int> pm_index;
         public void init_data(string v_pmkey = "id", int v_row_begin = 3)
         {
-            m_src_infos = new Dictionary<CellPoint, List<object>>();
             Excel.Cells data = m_sheet.Cells;
+            _pmKey = v_pmkey;
+            _data = new Dictionary<string, List<object>>();
             int col = m_header.get_col(v_pmkey);
             if (col < 0)
             {
@@ -256,6 +284,7 @@ namespace ExcelToLua
                 return;
             }
             pm_index = new Dictionary<string, int>();
+            string[] headerNames = m_header.Data;
             for (int i = v_row_begin; i < 100000; i++)
             {
                 object test_obj = data[i, col].Value;
@@ -264,7 +293,16 @@ namespace ExcelToLua
                     break;
                 }
                 if (!pm_index.ContainsKey(test_obj.ToString()))
+                {
                     pm_index.Add(test_obj.ToString(), i);
+                    List<object> rowData = new List<object>();
+                    _data[test_obj.ToString()] = rowData;
+                    for (int j = 0; j < headerNames.Length; j++)
+                    {
+                        rowData.Add(get_val(i, m_header[headerNames[j]]));
+                    }
+                }
+
             }
         }
 
@@ -285,44 +323,6 @@ namespace ExcelToLua
             m_sheet.Cells[row, col].Value = v_val;
         }
 
-        public void Add_val_by_pmid(string v_pmkey, string v_col_name, object v_val)
-        {
-            int col = m_header.get_col(v_col_name);
-            if (col < 0)
-            {
-                Debug.Error(string.Format("{0}中没找到名为{1}的列", m_sheet_name, v_col_name));
-                return;
-            }
-            if (!pm_index.ContainsKey(v_pmkey))
-            {
-                Debug.Error(string.Format("{0}中没找到名为{1}的主键", m_sheet_name, v_pmkey));
-                return;
-            }
-            int row = pm_index[v_pmkey];
-            CellPoint cp = new CellPoint(row, col);
-            if (!m_src_infos.ContainsKey(cp))
-            {
-                m_src_infos.Add(cp, new List<object>());
-            }
-            m_src_infos[cp].Add(v_val);
-        }
-        public void flush_src_infos()
-        {
-            foreach (var data in m_src_infos)
-            {
-                CellPoint p = data.Key;
-                List<object> src_info = data.Value;
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < src_info.Count; i++)
-                {
-                    if (i > 0)
-                        sb.Append(',');
-                    sb.Append(src_info[i]);
-                }
-                m_sheet.Cells[p.row, p.col].Value = sb.ToString();
-            }
-        }
-
         public Excel.Worksheet Sheet
         {
             get { return m_sheet; }
@@ -331,6 +331,35 @@ namespace ExcelToLua
         public ExcelHeaderHelp Header
         {
             get { return m_header; }
+        }
+
+        public ExcelSingleKeyData getExcelSingleKeyData()
+        {
+            ExcelSingleKeyData rtn = new ExcelSingleKeyData();
+            rtn._pmKey = _pmKey;
+            rtn.dataHeaders = new List<string>();
+            rtn._datas = new Dictionary<string, List<object>>();
+            string[] headerNames = m_header.Data;
+            for (int i = 0; i < headerNames.Length; i++)
+            {
+                if (headerNames[i] != _pmKey)
+                {
+                    rtn.dataHeaders.Add(headerNames[i]);
+                }
+            }
+
+            foreach (KeyValuePair<string, List<object>> pair in _data)
+            {
+                rtn._datas[pair.Key] = new List<object>();
+                for (int i = 0; i < headerNames.Length; i++)
+                {
+                    if (headerNames[i] != _pmKey)
+                    {
+                        rtn._datas[pair.Key].Add(pair.Value[i]);
+                    }
+                }
+            }
+            return rtn;
         }
     }
 }
