@@ -337,9 +337,12 @@ namespace ExcelToLua
                     List<KeyValue<ComplexExcelHeaderNode>> subs = v_cur.getKeyValueSet();
                     for (int i = 0; i < subs.Count; i++)
                     {
-                        if (i > 0)
-                            sb.Append("#");
-                        sb.Append(m_header_dct[subs[i].val.LeafDataIdx].RealType);
+                        if (m_header_dct[subs[i].val.LeafDataIdx] != null && m_header_dct[subs[i].val.LeafDataIdx].is_need_opt(2))
+                        {
+                            if (i > 0)
+                                sb.Append("#");
+                            sb.Append(m_header_dct[subs[i].val.LeafDataIdx].RealType);
+                        }
                     }
                     sb.Append("," + v_layer);
                     

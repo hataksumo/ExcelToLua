@@ -46,8 +46,8 @@ namespace ExcelToLua
         public static string srcWordsFilePath = "Words.翻译.xlsx";
         public static bool isTestAssetPath = true;
         public static string assetPath = "";
-        public static string[] copyCliPath = null;
-        public static string[] copyServPath = null;
+        public static string[] copyCliPath = new string[0];
+        public static string[] copyServPath = new string[0];
         public static bool isRealeace = false;
         public static List<Output_designer_config> designer_opt_configs;
         public static string simulator_src = ".\\战斗模拟_源数据.xlsx";
@@ -87,10 +87,14 @@ namespace ExcelToLua
             servPath = strSrvPath.Split('|')[0];
             //加载拷贝路径
             XmlNode copyNode = xmlroot.SelectSingleNode("copyPath");
-            string strCopyCliPath = copyNode.Attributes["cli"].Value;
-            copyCliPath = strCopyCliPath.Split('|');
-            string strCopySrvPath = copyNode.Attributes["serv"].Value;
-            copyServPath = strCopySrvPath.Split('|');
+            if (copyNode == null)
+            {
+                string strCopyCliPath = copyNode.Attributes["cli"].Value;
+                copyCliPath = strCopyCliPath.Split('|');
+                string strCopySrvPath = copyNode.Attributes["serv"].Value;
+                copyServPath = strCopySrvPath.Split('|');
+            }
+
             //修正路径
             cliPath = __rectify_folder_path(cliPath);
             servPath = __rectify_folder_path(servPath);
