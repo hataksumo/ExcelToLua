@@ -85,7 +85,7 @@
             this.Controls.Add(this.btnCalELO);
             this.Controls.Add(this.btnSele);
             this.Name = "frmMain";
-            this.Text = "数值策划工具";
+            this.Text = "属性计算导表工具";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.ResumeLayout(false);
 
