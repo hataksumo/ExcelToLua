@@ -87,7 +87,7 @@ namespace ExcelToLua
             servPath = strSrvPath.Split('|')[0];
             //加载拷贝路径
             XmlNode copyNode = xmlroot.SelectSingleNode("copyPath");
-            if (copyNode == null)
+            if (copyNode != null)
             {
                 string strCopyCliPath = copyNode.Attributes["cli"].Value;
                 copyCliPath = strCopyCliPath.Split('|');
