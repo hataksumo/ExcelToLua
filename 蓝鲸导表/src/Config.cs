@@ -131,7 +131,7 @@ namespace ExcelToLua
             }
 
 
-            if (!Directory.Exists(assetPath))
+            if (assetPath == "null" || !Directory.Exists(assetPath))
             {
                 Debug.Info("没有找到路径： {0},将不会对资源进行检测", assetPath);
                 isTestAssetPath = false;
