@@ -42,7 +42,7 @@ namespace ExcelToLua
                     root.outputValue(sb, 0);
                     sb.AppendLine();
                     sb.AppendFormat("ddt[\"{0}\"] = data\r\n", v_data.className);
-                    sb.Append("SetLooseReadonly(data)\r\n");
+                    //sb.Append("SetLooseReadonly(data)\r\n");
                     sb.Append("return data");
                 }
                 else

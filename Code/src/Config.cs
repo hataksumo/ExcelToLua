@@ -45,7 +45,7 @@ namespace ExcelToLua
         public static string luaCfgPath = "";
         public static string srcWordsFilePath = "Words.翻译.xlsx";
         public static bool isTestAssetPath = true;
-        public static string assetPath = "";
+        public static string assetPath = null;
         public static string[] copyCliPath = new string[0];
         public static string[] copyServPath = new string[0];
         public static bool isRealeace = false;
@@ -78,7 +78,8 @@ namespace ExcelToLua
             indexPath = xmlPathNode.Attributes["indexPath"].Value;
             templetPath = xmlPathNode.Attributes["templetPath"].Value;
             luaCfgPath = xmlPathNode.Attributes["lua_cfg"].Value;
-            assetPath = xmlPathNode.Attributes["assetPath"] != null? xmlPathNode.Attributes["assetPath"].Value:"null";
+            if (xmlPathNode.Attributes["assetPath"] != null)
+                 assetPath = xmlPathNode.Attributes["assetPath"].Value;
 
             //加载导出服务端路径和客户端路径
             string strCliPath = xmlPathNode.Attributes["cli"].Value;
@@ -131,11 +132,16 @@ namespace ExcelToLua
             }
 
 
-            if (assetPath == "null" || !Directory.Exists(assetPath))
+            if (assetPath == null|| !Directory.Exists(assetPath))
             {
-                Debug.Info("没有找到路径： {0},将不会对资源进行检测", assetPath);
                 isTestAssetPath = false;
+                if (assetPath != null)
+                {
+                    Debug.Info("没有找到路径： {0},将不会对资源进行检测", assetPath);
+                }              
             }
+
+            
 
             //设置设计表相关路径
             XmlNode attrDesignerNode = xmlroot.SelectSingleNode("attrDesigner");
