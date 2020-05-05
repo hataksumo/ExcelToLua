@@ -35,6 +35,20 @@ namespace ExcelToLua
         public int ikey;
         public string skey;
 
+        public Key(string v_key)
+        {
+            skey = v_key;
+            ikey = -1;
+            keytype = KeyType.String;
+        }
+
+        public Key(int v_key)
+        {
+            skey = null;
+            ikey = v_key;
+            keytype = KeyType.Integer;
+        }
+
         public override string ToString()
         {
             switch (keytype)

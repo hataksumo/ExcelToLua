@@ -16,7 +16,10 @@ namespace ExcelToLua
             StringBuilder sb = new StringBuilder();
             try
             {
-                JsonTable root = GetJsonTable(v_data._data);
+                JsonTable root = new JsonMap();
+                JsonTable data = GetJsonTable(v_data._data);
+                root.addData(new Key("data"), data);
+                root.addData(new Key("excelName"), new JsonString(v_data.excelName));
                 root.outputValue(sb, 0);
             }
             catch (Exception ex)
