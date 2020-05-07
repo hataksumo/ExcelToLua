@@ -56,3 +56,4 @@ E:\WORK\ExcelToLua\Code\src\obj\Debug\ExcelToLua.csproj.GenerateResource.cache
 E:\WORK\ExcelToLua\Code\src\obj\Debug\ExcelToLua.csproj.CopyComplete
 E:\WORK\ExcelToLua\Code\src\obj\Debug\ExcelToLua.exe
 E:\WORK\ExcelToLua\Code\src\obj\Debug\ExcelToLua.pdb
+E:\WORK\ExcelToLua\Code\src\obj\Debug\ExcelToLua.csproj.CoreCompileInputs.cache

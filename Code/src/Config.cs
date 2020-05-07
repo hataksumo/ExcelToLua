@@ -53,6 +53,7 @@ namespace ExcelToLua
         public static string simulator_src = ".\\战斗模拟_源数据.xlsx";
         public static string simulator_tar = ".\\战斗模拟_输出.xlsx";
         public static string[] outputFiles = null;
+        public static bool bCopy = false;
 
 
 
@@ -81,6 +82,13 @@ namespace ExcelToLua
             if (xmlPathNode.Attributes["assetPath"] != null)
                  assetPath = xmlPathNode.Attributes["assetPath"].Value;
 
+            //检测Index表路径是否正确
+            if (!File.Exists(indexPath))
+            {
+                Debug.Error("index路径 \"" + indexPath + "\" 不正确");
+                return;
+            }
+
             //加载导出服务端路径和客户端路径
             string strCliPath = xmlPathNode.Attributes["cli"].Value;
             cliPath = strCliPath.Split('|')[0];
@@ -94,27 +102,35 @@ namespace ExcelToLua
                 copyCliPath = strCopyCliPath.Split('|');
                 string strCopySrvPath = copyNode.Attributes["serv"].Value;
                 copyServPath = strCopySrvPath.Split('|');
+                bCopy = true;
             }
 
             //修正路径
             cliPath = __rectify_folder_path(cliPath);
             servPath = __rectify_folder_path(servPath);
-            for (int i = 0; i < copyCliPath.Length; i++)
-            {
-                copyCliPath[i] = __rectify_folder_path(copyCliPath[i]);
-            }
-            for (int i = 0; i < copyServPath.Length; i++)
-            {
-                copyServPath[i] = __rectify_folder_path(copyServPath[i]);
-            }
 
+            if (bCopy)
+            {
+                for (int i = 0; i < copyCliPath.Length; i++)
+                {
+                    copyCliPath[i] = __rectify_folder_path(copyCliPath[i]);
+                }
+                for (int i = 0; i < copyServPath.Length; i++)
+                {
+                    copyServPath[i] = __rectify_folder_path(copyServPath[i]);
+                }
+            }
 
             //检测所配置的路径是否有误
-            string[] pathes = new string[2 + copyCliPath.Length + copyServPath.Length];
+            string[] pathes = new string[2 + (bCopy ? copyCliPath.Length + copyServPath.Length:0)];
             pathes[0] = cliPath;
             pathes[1] = servPath;
-            Array.Copy(copyCliPath, 0, pathes, 2, copyCliPath.Length);
-            Array.Copy(copyServPath, 0, pathes, 2+ copyCliPath.Length, copyServPath.Length);
+            if (bCopy)
+            {
+                Array.Copy(copyCliPath, 0, pathes, 2, copyCliPath.Length);
+                Array.Copy(copyServPath, 0, pathes, 2 + copyCliPath.Length, copyServPath.Length);
+            }
+            
             for (int i = 0; i < pathes.Length; i++)
             {
                 if (!Directory.Exists(pathes[i]))
