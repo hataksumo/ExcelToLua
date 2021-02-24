@@ -111,6 +111,29 @@ namespace ExcelToLua
         }
     }
 
+    class JsonLong : JsonValue
+    {
+        protected long m_data;
+
+        public JsonLong() { }
+        public JsonLong(long v_long)
+        {
+            init(v_long);
+        }
+        public void init(long v_data)
+        {
+            m_data = v_data;
+        }
+        public override void outputValue(StringBuilder sb, int v_level, uint v_style = 0)
+        {
+            sb.Append(m_data);
+        }
+    }
+
+
+
+
+
     class JsonHexInteger : JsonInteger
     {
         public override void outputValue(StringBuilder sb, int v_level, uint v_style = 0)

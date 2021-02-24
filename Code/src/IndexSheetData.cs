@@ -64,8 +64,6 @@ namespace ExcelToLua
             string suffixName = System.IO.Path.GetExtension(v_fileName);
             if (suffixName == ".lua")
                 return ELanguage.lua;
-            if (suffixName == ".lua2")
-                return ELanguage.lua2;
             if (suffixName == ".xml")
                 return ELanguage.xml;
             if (suffixName == ".json")

@@ -38,17 +38,18 @@ namespace ExcelToLua
         public static string packageName = "dTable";
         public static string cliPath = null;
         public static string servPath = null;
-        public static string export_path = "";
+        public static string export_path = "./luaBytes/";
         public static string excelPath = "";
         public static string indexPath = "";
-        public static string templetPath = "";
+        public static bool bReadIndex = true;
         public static string luaCfgPath = "";
+        public static bool bLoadLua = false;
         public static string srcWordsFilePath = "Words.翻译.xlsx";
         public static bool isTestAssetPath = true;
         public static string assetPath = null;
         public static string[] copyCliPath = new string[0];
         public static string[] copyServPath = new string[0];
-        public static bool isRealeace = false;
+        //public static bool isRealeace = false;
         public static List<Output_designer_config> designer_opt_configs;
         public static string simulator_src = ".\\战斗模拟_源数据.xlsx";
         public static string simulator_tar = ".\\战斗模拟_输出.xlsx";
@@ -70,24 +71,38 @@ namespace ExcelToLua
             //读取策划数据包名
             packageName = xmlroot.SelectSingleNode("package").Attributes["name"].Value;
             //APP设置
-            XmlNode appNode = xmlroot.SelectSingleNode("app");
-            isRealeace = bool.Parse(appNode.Attributes["isRelease"].Value);
+            //XmlNode appNode = xmlroot.SelectSingleNode("app");
+            //isRealeace = bool.Parse(appNode.Attributes["isRelease"].Value);
             //设置策划表路径
             XmlNode xmlPathNode = xmlroot.SelectSingleNode("path");
-            export_path = xmlPathNode.Attributes["export"].Value;
+            //luaByte输出路径
+            if(xmlPathNode.Attributes["export"]!= null)
+                export_path = xmlPathNode.Attributes["export"].Value;
             excelPath = xmlPathNode.Attributes["excelPath"].Value;
-            indexPath = xmlPathNode.Attributes["indexPath"].Value;
-            templetPath = xmlPathNode.Attributes["templetPath"].Value;
-            luaCfgPath = xmlPathNode.Attributes["lua_cfg"].Value;
+            var attrNode = xmlPathNode.Attributes["indexPath"];
+            if (attrNode == null)
+            {
+                bReadIndex = false;
+            }
+            else
+            {
+                indexPath = xmlPathNode.Attributes["indexPath"].Value;
+                if (!File.Exists(indexPath))
+                {
+                    Debug.Error("index路径 \"" + indexPath + "\" 不正确");
+                    return;
+                }
+            }
+            
+            var luaPathNode = xmlPathNode.Attributes["lua_cfg"];
+            if (luaPathNode != null)
+            {
+                luaCfgPath = xmlPathNode.Attributes["lua_cfg"].Value;
+                bLoadLua = true;
+            }   
             if (xmlPathNode.Attributes["assetPath"] != null)
                  assetPath = xmlPathNode.Attributes["assetPath"].Value;
 
-            //检测Index表路径是否正确
-            if (!File.Exists(indexPath))
-            {
-                Debug.Error("index路径 \"" + indexPath + "\" 不正确");
-                return;
-            }
 
             //加载导出服务端路径和客户端路径
             string strCliPath = xmlPathNode.Attributes["cli"].Value;
@@ -185,7 +200,12 @@ namespace ExcelToLua
                 for (int i = 0; i < filesNode.Count; i++)
                 {
                     XmlNode theFileNode = filesNode.Item(i);
-                    string thePath = root + theFileNode.InnerText + ".xlsx";
+                    string fileInnerText = theFileNode.InnerText;
+                    string thePath = root + fileInnerText;
+                    if (!Path.HasExtension(thePath)) {
+                        thePath += ".xlsx";
+                    }
+
                     path.Add(thePath);
                 }
                 outputFiles = path.ToArray();

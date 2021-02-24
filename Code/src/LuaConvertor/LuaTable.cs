@@ -126,6 +126,27 @@ namespace ExcelToLua
         }
     }
 
+    class LuaLong : LuaValue
+    {
+        protected long m_data;
+        public LuaLong() { }
+        public LuaLong(long v_long)
+        {
+            init(v_long);
+        }
+        public void init(long v_data)
+        {
+            m_data = v_data;
+        }
+        public override void outputValue(StringBuilder sb, int v_level, uint v_style = 0)
+        {
+            sb.Append(m_data);
+        }
+    }
+
+
+
+
     class LuaHexInteger : LuaInteger
     {
         public override void outputValue(StringBuilder sb, int v_level, uint v_style = 0)

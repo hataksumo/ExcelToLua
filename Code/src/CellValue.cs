@@ -163,6 +163,7 @@ namespace ExcelToLua
             switch (v_type)
             {
                 case "int":
+                case "integer":
                     rtn = new IntVal();
                     break;
                 case "string":
@@ -170,6 +171,9 @@ namespace ExcelToLua
                     break;
                 case "cstring":
                     rtn = new CStringVal();
+                    break;
+                case "long":
+                    rtn = new LongVal();
                     break;
                 case "res":
                     rtn = new ResVal();
@@ -431,6 +435,67 @@ namespace ExcelToLua
         }
     }
 
+    class LongVal : CellValue
+    {
+        protected long _data;
+
+        protected override bool _OnInit(string v_strCellVal, string[] v_constraint)
+        {
+            if (!long.TryParse(v_strCellVal, out _data))
+            {
+                Debug.ExcelError(v_strCellVal + "  数据格式不对");
+                return false;
+            }
+            return true;
+        }
+
+        public override bool Equals(CellValue v_other)
+        {
+            LongVal longVal = v_other as LongVal;
+            return longVal != null && longVal._data == _data;
+        }
+
+        protected override LuaValue _OnGetLuaValue()
+        {
+            LuaLong rtn = new LuaLong();
+            rtn.init(_isEmpty ? -1 : _data);
+            return rtn;
+        }
+        protected override JsonValue _OnGetJsonValue()
+        {
+            JsonLong rtn = new JsonLong();
+            rtn.init(_isEmpty ? -1 : _data);
+            return rtn;
+        }
+
+        protected override string _OnGetTxtValue()
+        {
+            return ToString();
+        }
+        public override string ToKeyString()
+        {
+            return _data.ToString();
+        }
+
+        protected override string _OnGetXmlAttribute()
+        {
+            return _data.ToString();
+        }
+
+        public override string ToString()
+        {
+            return _data.ToString();
+        }
+
+        public override Key ToKey()
+        {
+            Key rtn = new Key();
+            rtn.keytype = KeyType.String;
+            rtn.skey = _data.ToString();
+            return rtn;
+        }
+    }
+
     class CStringVal : StringVal
     {
         protected override bool _OnInit(string v_strCellVal, string[] v_constraint)
@@ -449,7 +514,7 @@ namespace ExcelToLua
         }
     }
 
-    class IDVal : IntVal
+    class IDVal : LongVal
     {
         //protected int _data;
         protected string m_type;

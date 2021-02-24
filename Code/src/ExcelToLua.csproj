@@ -59,9 +59,8 @@
     <Reference Include="Aspose.Cells">
       <HintPath>DLL\Aspose.Cells.dll</HintPath>
     </Reference>
-    <Reference Include="KeraLua, Version=0.1.14.0, Culture=neutral, PublicKeyToken=6a194c04b9c89217, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>DLL\KeraLua.dll</HintPath>
+    <Reference Include="KeraLua, Version=1.2.0.0, Culture=neutral, PublicKeyToken=6a194c04b9c89217, processorArchitecture=MSIL">
+      <HintPath>packages\KeraLua.1.2.0\lib\net45\KeraLua.dll</HintPath>
     </Reference>
     <Reference Include="NLua, Version=1.4.1.0, Culture=neutral, PublicKeyToken=6a194c04b9c89217, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -103,7 +102,6 @@
     <Compile Include="IndexSheetData.cs" />
     <Compile Include="JsonConvertor\JsonExporter.cs" />
     <Compile Include="JsonConvertor\JsonTable.cs" />
-    <Compile Include="LuaConvertor2\LuaExporter2.cs" />
     <Compile Include="LuaConvertor\LuaExporter.cs" />
     <Compile Include="LuaConvertor\LuaTable.cs" />
     <Compile Include="LuaState.cs" />
@@ -141,12 +139,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="templet\lua_main_templet.lua">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="templet\lua_subform_templet.lua">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -181,7 +173,9 @@
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('.\packages\KeraLua.1.0.2\build\net45\KeraLua.targets')" Text="$([System.String]::Format('$(ErrorText)', '.\packages\KeraLua.1.0.2\build\net45\KeraLua.targets'))" />
+    <Error Condition="!Exists('packages\KeraLua.1.2.0\build\net45\KeraLua.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\KeraLua.1.2.0\build\net45\KeraLua.targets'))" />
   </Target>
+  <Import Project="packages\KeraLua.1.2.0\build\net45\KeraLua.targets" Condition="Exists('packages\KeraLua.1.2.0\build\net45\KeraLua.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

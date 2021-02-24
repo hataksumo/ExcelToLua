@@ -217,9 +217,6 @@ namespace ExcelToLua
                         case ELanguage.lua:
                             optData = LuaExporter.getExportContent(cur_pair.Value, optCode[i], root_pathes[i], cur_pair.Key);
                             break;
-                        case ELanguage.lua2:
-                            optData = LuaExporter2.getExportContent(cur_pair.Value, optCode[i], root_pathes[i][0], cur_pair.Key);
-                            break;
                         case ELanguage.json:
                             optData = JsonExporter.getExportContent(cur_pair.Value, optCode[i], root_pathes[i], cur_pair.Key);
                             break;
@@ -301,104 +298,115 @@ namespace ExcelToLua
         protected void _load()
         {
             //加载luastate
-            updateDesc("加载luastate......");
-            try
+            if (Config.bLoadLua)
             {
-                LuaState.Init(Config.luaCfgPath + "main.lua");
-                LuaState.SetPath(Config.luaCfgPath);
-                LuaState.DoMain();
-            }
-            catch (Exception ex)
-            {
-                Debug.Error("加载lua报错，信息是" + ex.ToString());
-                return;
-            }
-            updateDesc("luastate加载完成");
-            Thread.Sleep(50);
-            updateDesc("读取INDEX表......");
-            Excel.Workbook indexBook = new Excel.Workbook(Config.indexPath);
-            Excel.Worksheet indexSheet = indexBook.Worksheets["index"];
-            Excel.Cells data = indexSheet.Cells;
-            SheetHeader header = new SheetHeader();
-            header.readHeader(indexSheet);
-            List<NameCatchIndexData> nameCatchIndexDatas = new List<NameCatchIndexData>();
-
-            //读取需要索引的数据列表
-            for (int row = 1; row < 200; row++)
-            {
-                if (data[row, 0].Value == null || string.IsNullOrWhiteSpace(data[row, 0].Value.ToString()))
-                {
-                    break;
-                }
-                NameCatchIndexData rowData = new NameCatchIndexData();
-                rowData.readData(data, row, header);
-                nameCatchIndexDatas.Add(rowData);
-            }
-            updateDesc("INDEX表读取完成");
-            Thread.Sleep(50);
-            updateDesc("根据INDEX表加载各名称表......");
-            NickNameColCatchManager nickNameColCatchManager = NickNameColCatchManager.getInstence();
-            nickNameColCatchManager.init();
-            Thread.Sleep(50);
-            //打开各表，生成各名称ID转换
-            foreach (NameCatchIndexData curIndex in nameCatchIndexDatas.ToArray())
-            {
-                string excelPath = Config.excelPath + curIndex.excelFileName + ".xlsx";
-                updateDesc(string.Format("加载表{0},处理名称{1}......", curIndex.excelFileName, curIndex.fieldName));
-                Excel.Worksheet sheet = null;
-                if (!File.Exists(excelPath))
-                {
-                    Debug.Error("{0}不存在", excelPath);
-                    return;
-                }
+                updateDesc("加载luastate......");
                 try
                 {
-                    Excel.Workbook book = new Excel.Workbook(excelPath);
-                    sheet = book.Worksheets[curIndex.sheetName];
-                    if (sheet == null)
-                        Debug.Exception("没有找到名为[" + curIndex.sheetName + "]的sheet");
+                    LuaState.Init(Config.luaCfgPath + "main.lua");
+                    LuaState.SetPath(Config.luaCfgPath);
+                    LuaState.DoMain();
                 }
                 catch (Exception ex)
                 {
-                    Debug.Error(ex.ToString());
-                    Application.Exit();
+                    Debug.Error("加载lua报错，信息是" + ex.ToString());
                     return;
                 }
-                SheetHeader theHeader = new SheetHeader();
-                theHeader.readHeader(sheet, curIndex.headRow - 1);
-                int idColIndex = theHeader[curIndex.columName];
-                if (idColIndex == -1)
+                updateDesc("luastate加载完成");
+            }
+            Thread.Sleep(50);
+            if (Config.bReadIndex)
+            {
+                updateDesc("读取INDEX表......");
+                Excel.Workbook indexBook = new Excel.Workbook(Config.indexPath);
+                Excel.Worksheet indexSheet = indexBook.Worksheets["index"];
+                Excel.Cells data = indexSheet.Cells;
+                SheetHeader header = new SheetHeader();
+                header.readHeader(indexSheet);
+                List<NameCatchIndexData> nameCatchIndexDatas = new List<NameCatchIndexData>();
+
+                //读取需要索引的数据列表
+                for (int row = 1; row < 200; row++)
                 {
-                    Debug.Error("{1}  列{0}不存在", curIndex.columName, curIndex.excelFileName + "[" + curIndex.sheetName + "]");
-                    return;
-                }
-                int noteIndex = theHeader[curIndex.noteColName];
-                if (noteIndex == -1)
-                {
-                    Debug.Error("{1}  列{0}不存在", curIndex.noteColName, curIndex.excelFileName + "[" + curIndex.sheetName + "]");
-                    return;
-                }
-                Excel.Cells theDatas = sheet.Cells;
-                for (int row = curIndex.dataRowBegin - 1; row < 100000; row++)
-                {
-                    nickNameColCatchManager.createCatch(curIndex.fieldName, curIndex.valueType);
-                    if (theDatas[row, 0].Value == null || string.IsNullOrWhiteSpace(theDatas[row, 0].Value.ToString()))
+                    if (data[row, 0].Value == null || string.IsNullOrWhiteSpace(data[row, 0].Value.ToString()))
                     {
                         break;
                     }
+                    NameCatchIndexData rowData = new NameCatchIndexData();
+                    rowData.readData(data, row, header);
+                    nameCatchIndexDatas.Add(rowData);
+                }
+                updateDesc("INDEX表读取完成");
+                Thread.Sleep(50);
+                updateDesc("根据INDEX表加载各名称表......");
+                NickNameColCatchManager nickNameColCatchManager = NickNameColCatchManager.getInstence();
+                nickNameColCatchManager.init();
+                Thread.Sleep(50);
+                //打开各表，生成各名称ID转换
+                foreach (NameCatchIndexData curIndex in nameCatchIndexDatas.ToArray())
+                {
+                    string excelPath = Config.excelPath + curIndex.excelFileName;
+                    updateDesc(string.Format("加载表{0},处理名称{1}......", curIndex.excelFileName, curIndex.fieldName));
+                    Excel.Worksheet sheet = null;
+                    if (!File.Exists(excelPath))
+                    {
+                        Debug.Error("{0}不存在", excelPath);
+                        return;
+                    }
                     try
                     {
-                        int id = theDatas[row, idColIndex].IntValue;
-                        string nickName = theDatas[row, noteIndex].StringValue;
-                        nickNameColCatchManager.addData(curIndex.fieldName, nickName, id);
+                        Excel.Workbook book = new Excel.Workbook(excelPath);
+                        sheet = book.Worksheets[curIndex.sheetName];
+                        if (sheet == null)
+                            Debug.Exception("没有找到名为[" + curIndex.sheetName + "]的sheet");
                     }
                     catch (Exception ex)
                     {
-                        Debug.Error("{0}表[{1}],第{2}行出错啦，错误信息为:\r\n  " + ex.ToString(), curIndex.excelFileName, curIndex.sheetName, row + 1);
+                        Debug.Error(ex.ToString());
+                        Application.Exit();
                         return;
                     }
+                    SheetHeader theHeader = new SheetHeader();
+                    theHeader.readHeader(sheet, curIndex.headRow - 1);
+                    int idColIndex = theHeader[curIndex.columName];
+                    if (idColIndex == -1)
+                    {
+                        Debug.Error("{1}  列{0}不存在", curIndex.columName, curIndex.excelFileName + "[" + curIndex.sheetName + "]");
+                        return;
+                    }
+                    int noteIndex = theHeader[curIndex.noteColName];
+                    if (noteIndex == -1)
+                    {
+                        Debug.Error("{1}  列{0}不存在", curIndex.noteColName, curIndex.excelFileName + "[" + curIndex.sheetName + "]");
+                        return;
+                    }
+                    Excel.Cells theDatas = sheet.Cells;
+                    for (int row = curIndex.dataRowBegin - 1; row < 100000; row++)
+                    {
+                        nickNameColCatchManager.createCatch(curIndex.fieldName, curIndex.valueType);
+                        if (theDatas[row, 0].Value == null || string.IsNullOrWhiteSpace(theDatas[row, 0].Value.ToString()))
+                        {
+                            break;
+                        }
+                        try
+                        {
+                            long id = long.Parse(theDatas[row, idColIndex].StringValue);
+                            string nickName = theDatas[row, noteIndex].StringValue;
+                            nickNameColCatchManager.addData(curIndex.fieldName, nickName, id);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.Error("{0}表[{1}],第{2}行出错啦，错误信息为:\r\n  " + ex.ToString(), curIndex.excelFileName, curIndex.sheetName, row + 1);
+                            return;
+                        }
+                    }
+                    updateDesc(string.Format("表{0}加载完成", curIndex.excelFileName));
+                    Thread.Sleep(50);
                 }
-                updateDesc(string.Format("表{0}加载完成", curIndex.excelFileName));
+            }
+            else 
+            {
+                updateDesc("INDEX表没有配置，不加载nickNameCatch");
                 Thread.Sleep(50);
             }
             workFinished();
@@ -605,6 +613,12 @@ namespace ExcelToLua
                 int valueTypeIdx = v_header["值类型"];
                 fieldName = v_data[v_row, fieldNameIdx].StringValue;
                 excelFileName = v_data[v_row, tableNameIdx].StringValue;
+                if (!(excelFileName.EndsWith(".xlsm")|| 
+                    excelFileName.EndsWith(".xlsx") || 
+                    excelFileName.EndsWith(".xls") || excelFileName.EndsWith(".csv"))) {
+                    excelFileName += ".xlsx";
+                }
+
                 sheetName = v_data[v_row, sheetNameIdx].StringValue;
                 headRow = v_data[v_row, columIndexIdx].IntValue;
                 columName = v_data[v_row, colimNameIdx].StringValue;

@@ -46,7 +46,7 @@ namespace ExcelToLua
             }
         }
 
-        public void addData(string v_setName, string v_keyName, int v_id)
+        public void addData(string v_setName, string v_keyName, long v_id)
         {
             if (!m_data.ContainsKey(v_setName))
             {
@@ -57,7 +57,7 @@ namespace ExcelToLua
                 Debug.Exception("添加重复键{0}：{1}", v_keyName, v_id);
             }
         }
-        public bool getID(string v_setName, string v_keyName,out int vout_id)
+        public bool getID(string v_setName, string v_keyName,out long vout_id)
         {
             NickNameColCatch nickNameColCatch = m_data[v_setName];
             return nickNameColCatch.getID(v_keyName, out vout_id);
@@ -85,7 +85,7 @@ namespace ExcelToLua
 
             if (m_data.ContainsKey(v_colType))
             {
-                int id;
+                long id;
                 string strCellData = v_cellData.ToString();
                 if (getID(v_colType, strCellData, out id))
                 {
@@ -102,7 +102,7 @@ namespace ExcelToLua
             return false;
         }
 
-        public bool checkData(string v_colType, Object v_cellData, out int vout_id)
+        public bool checkData(string v_colType, Object v_cellData, out long vout_id)
         {
             if (v_cellData == null)
             {
@@ -112,7 +112,7 @@ namespace ExcelToLua
 
             if (m_data.ContainsKey(v_colType))
             {
-                int id;
+                long id;
                 string strCellData = v_cellData.ToString();
                 if (getID(v_colType, strCellData, out id))
                 {
@@ -162,15 +162,15 @@ namespace ExcelToLua
 
     class NickNameColCatch
     {
-        protected List<KeyValuePair<string, int>> m_data;
+        protected List<KeyValuePair<string, long>> m_data;
         protected Dictionary<string, int> m_keyIndex;
-        protected HashSet<int> m_ids;
+        protected HashSet<long> m_ids;
         protected ValueType m_valueType;
         public NickNameColCatch(string v_valType)
         {
-            m_data = new List<KeyValuePair<string, int>>();
+            m_data = new List<KeyValuePair<string, long>>();
             m_keyIndex = new Dictionary<string, int>();
-            m_ids = new HashSet<int>();
+            m_ids = new HashSet<long>();
             if (v_valType == "string")
             {
                 m_valueType = ValueType.字符串;
@@ -188,19 +188,19 @@ namespace ExcelToLua
                 m_valueType = ValueType.其他;
             }
         }
-        public bool addData(string v_key, int v_val)
+        public bool addData(string v_key, long v_val)
         {
             int cnt = m_data.Count;
             bool isDuplicated = m_keyIndex.ContainsKey(v_key);
             if (isDuplicated) return false;
-            m_data.Add(new KeyValuePair<string, int>(v_key, v_val));
+            m_data.Add(new KeyValuePair<string, long>(v_key, v_val));
             m_keyIndex.Add(v_key, cnt);
             m_ids.Add(v_val);
             return true;
         }
-        public bool getID(string v_id, out int vo_id)
+        public bool getID(string v_id, out long vo_id)
         {
-            if (int.TryParse(v_id, out vo_id))
+            if (long.TryParse(v_id, out vo_id))
             {
                 return m_ids.Contains(vo_id);
             }

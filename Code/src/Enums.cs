@@ -20,7 +20,6 @@ namespace ExcelToLua
     {
         none,
         lua,
-        lua2,
         xml,
         json,
         txt
